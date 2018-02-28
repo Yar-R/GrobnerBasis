@@ -5,8 +5,8 @@
 #ifndef GROBNERBASIS_POLYNOMIAL_H
 #define GROBNERBASIS_POLYNOMIAL_H
 
-#include "Comparator.h"
-#include "Term.h"
+#include "Comparator.hpp"
+#include "Term.hpp"
 
 class Polynomial {
     std::vector<Term> terms;

@@ -3,5 +3,5 @@ project(GrobnerBasis)
 
 set(CMAKE_CXX_STANDARD 14)
 
-set(SOURCE_FILES main.cpp Monomial.cpp Monomial.h Polynomial.cpp Polynomial.h Comparator.cpp Comparator.h Term.cpp Term.h)
+set(SOURCE_FILES Monomial.hpp Term.hpp Comparator.hpp main.cpp)
 add_executable(GrobnerBasis ${SOURCE_FILES})
