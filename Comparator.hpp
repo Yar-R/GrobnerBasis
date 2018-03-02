@@ -6,41 +6,44 @@
 #define GROBNERBASIS_COMPARATOR_H
 
 #include <functional>
+#include <memory>
 #include "Monomial.hpp"
 #include "Term.hpp"
 
-template <typename ValT>
+template<typename CoefType, typename PowType>
 class Comparator {
 public:
-    virtual bool operator()(const Monomial<ValT>& a, const Monomial<ValT>& b) = 0;
-    std::function<bool(const Monomial<ValT>&, const Monomial<ValT>&)>  get_cmp_func();;
+    virtual bool operator()(const Monomial<PowType> &a, const Monomial<PowType> &b) = 0;
+
+    std::function<bool(const Monomial<PowType> &, const Monomial<PowType> &)> get_cmp_func();;
 };
 
-template <typename ValT>
-class LexComparator: public Comparator<ValT> {
+template<typename CoefType, typename PowType>
+class LexComparator : public Comparator<CoefType, PowType> {
 public:
-    bool operator()(const Monomial<ValT>& a, const Monomial<ValT>& b) override ;
+    bool operator()(const Monomial<PowType> &a, const Monomial<PowType> &b) override;
 };
 
-template <typename ValT>
-class GrlexComparator : public Comparator<ValT> {
+template<typename CoefType, typename PowType>
+class GrlexComparator : public Comparator<CoefType, PowType> {
+public:;
+    bool operator()(const Monomial<PowType> &a, const Monomial<PowType> &b) override;
+};
+
+template<typename CoefType, typename PowType>
+class GrevlexComparator : public Comparator<CoefType, PowType> {
 public:
-    bool operator()(const Monomial<ValT>& a, const Monomial<ValT>& b) override ;
+    bool operator()(const Monomial<PowType> &a, const Monomial<PowType> &b) override;
 };
 
-template <typename ValT>
-class GrevlexComparator : public Comparator<ValT> {
-public:
-    bool operator()(const Monomial<ValT>& a, const Monomial<ValT>& b) override ;
-};
-
-template <typename ValT>
-std::function<bool(const Monomial<ValT> &, const Monomial<ValT> &)> Comparator<ValT>::get_cmp_func() {
-    return [this](const Monomial<ValT> &a, const Monomial<ValT> &b)->bool{ return this->operator()(a, b);};
+template<typename CoefType, typename PowType>
+std::function<bool(const Monomial<PowType> &, const Monomial<PowType> &)>
+Comparator<CoefType, PowType>::get_cmp_func() {
+    return [this](const Monomial<PowType> &a, const Monomial<PowType> &b) -> bool { return this->operator()(a, b); };
 }
 
-template <typename ValT>
-bool LexComparator<ValT>::operator()(const Monomial<ValT> &a, const Monomial<ValT> &b) {
+template<typename CoefType, typename PowType>
+bool LexComparator<CoefType, PowType>::operator()(const Monomial<PowType> &a, const Monomial<PowType> &b) {
     for (size_t i = 0; i < a.size(); ++i) {
         if (a[i] != b[i]) {
             return a[i] < b[i];
@@ -49,9 +52,9 @@ bool LexComparator<ValT>::operator()(const Monomial<ValT> &a, const Monomial<Val
     return false;
 }
 
-template <typename ValT>
-bool GrlexComparator<ValT>::operator()(const Monomial<ValT> &a, const Monomial<ValT> &b) {
-    ValT sum_a = 0, sum_b = 0;
+template<typename CoefType, typename PowType>
+bool GrlexComparator<CoefType, PowType>::operator()(const Monomial<PowType> &a, const Monomial<PowType> &b) {
+    PowType sum_a = 0, sum_b = 0;
     bool ret = false, flag = false;
     for (size_t i = 0; i < a.size(); ++i) {
         sum_a += a[i];
@@ -69,9 +72,9 @@ bool GrlexComparator<ValT>::operator()(const Monomial<ValT> &a, const Monomial<V
 }
 
 
-template <typename ValT>
-bool GrevlexComparator<ValT>::operator()(const Monomial<ValT> &a, const Monomial<ValT> &b) {
-    ValT sum_a = 0, sum_b = 0;
+template<typename CoefType, typename PowType>
+bool GrevlexComparator<CoefType, PowType>::operator()(const Monomial<PowType> &a, const Monomial<PowType> &b) {
+    PowType sum_a = 0, sum_b = 0;
     bool ret = false;
     for (size_t i = a.size(); i > 0; --i) {
         sum_a += a[i - 1];
@@ -87,27 +90,28 @@ bool GrevlexComparator<ValT>::operator()(const Monomial<ValT> &a, const Monomial
     }
 }
 
-template <typename ValT>
-class Proxy
-{
+template<typename CoefType, typename PowType>
+class Proxy {
 private:
-    Comparator<ValT> *cmp;
+    std::shared_ptr<Comparator<CoefType, PowType>> cmp;
 public:
-    explicit Proxy(Comparator<ValT> *cmp);
-    bool operator()(const Monomial<ValT> &r1, const Monomial<ValT> &r2);
-    bool operator()(const Term<ValT> &r1, const Term<ValT> &r2);
+    explicit Proxy(std::shared_ptr<Comparator<CoefType, PowType>> cmp);
+
+    bool operator()(const Monomial<PowType> &r1, const Monomial<PowType> &r2);
+
+    bool operator()(const Term<CoefType, PowType> &r1, const Term<CoefType, PowType> &r2);
 };
 
-template <typename ValT>
-Proxy<ValT>::Proxy(Comparator<ValT> *cmp) :cmp(cmp) {}
+template<typename CoefType, typename PowType>
+Proxy<CoefType, PowType>::Proxy(std::shared_ptr<Comparator<CoefType, PowType>> cmp) :cmp(cmp) {}
 
-template <typename ValT>
-bool Proxy<ValT>::operator()(const Monomial<ValT> &r1, const Monomial<ValT> &r2) {
+template<typename CoefType, typename PowType>
+bool Proxy<CoefType, PowType>::operator()(const Monomial<PowType> &r1, const Monomial<PowType> &r2) {
     return this->cmp->operator()(r1, r2);
 }
 
-template <typename ValT>
-bool Proxy<ValT>::operator()(const Term<ValT> &r1, const Term<ValT> &r2) {
+template<typename CoefType, typename PowType>
+bool Proxy<CoefType, PowType>::operator()(const Term<CoefType, PowType> &r1, const Term<CoefType, PowType> &r2) {
     return this->cmp->operator()(r1.mon(), r2.mon());
 };
 
