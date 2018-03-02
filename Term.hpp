@@ -8,111 +8,128 @@
 
 #include "Monomial.hpp"
 
-template <typename ValT>
+template<typename CoefType, typename PowType>
 class Term {
-    double coefficient;
-    Monomial<ValT> monomial;
+    CoefType coefficient;
+    Monomial<PowType> monomial;
 public:
-    Term<ValT>() = default;
-    Term<ValT>(Term<ValT> &&_t) noexcept;
-    Term<ValT>(const Term<ValT>& _t);
-    Term<ValT>(Monomial<ValT>&& mon, double coef);
-    Term<ValT>(const Monomial<ValT>& mon, double coef);
-    Term<ValT>& operator=(Term<ValT>&& t) noexcept ;
-    Term<ValT>& operator=(const Term<ValT>& t);
-    Term<ValT>& operator*=(const Term<ValT>& other);
-    const Monomial<ValT>& mon();
-    const double coef();
-    const Monomial<ValT>& mon() const;
-    const double coef() const;
-    template <typename T>
-    friend bool operator==(const Term<T>& a, const Term<T>& b);
-    template <typename T>
-    friend Term<T> operator*(const Term<T>& a, const Term<T>& b);
-    template <typename T>
-    friend std::pair<Term<T>, bool> operator/(const Term<T>& a, const Term<T>& b);
-    template <typename T>
-    friend std::ostream& operator<<(std::ostream& os, const Term<T>& t);
+    Term<CoefType, PowType>() = default;
+
+    Term<CoefType, PowType>(Term<CoefType, PowType> &&_t) noexcept;
+
+    Term<CoefType, PowType>(const Term<CoefType, PowType> &_t);
+
+    Term<CoefType, PowType>(Monomial<PowType> &&mon, CoefType coef);
+
+    Term<CoefType, PowType>(const Monomial<PowType> &mon, CoefType coef);
+
+    Term<CoefType, PowType> &operator=(Term<CoefType, PowType> &&t) noexcept;
+
+    Term<CoefType, PowType> &operator=(const Term<CoefType, PowType> &t);
+
+    Term<CoefType, PowType> &operator*=(const Term<CoefType, PowType> &other);
+
+    const Monomial<PowType> &mon();
+
+    const CoefType& coef();
+
+    const Monomial<PowType> &mon() const;
+
+    const CoefType& coef() const;
+
+    template<typename T1, typename T2>
+    friend bool operator==(const Term<T1, T2> &a, const Term<T1, T2> &b);
+
+    template<typename T1, typename T2>
+    friend Term<T1, T2> operator*(const Term<T1, T2> &a, const Term<T1, T2> &b);
+
+    template<typename T1, typename T2>
+    friend std::pair<Term<T1, T2>, bool> operator/(const Term<T1, T2> &a, const Term<T1, T2> &b);
+
+    template<typename T1, typename T2>
+    friend std::ostream &operator<<(std::ostream &os, const Term<T1, T2> &t);
 };
 
-template <typename ValT>
-Term<ValT>::Term(Term<ValT> &&_t) noexcept : coefficient(_t.coefficient), monomial(_t.monomial) {}
+template<typename CoefType, typename PowType>
+Term<CoefType, PowType>::Term(Term<CoefType, PowType> &&_t) noexcept : coefficient(_t.coefficient),
+                                                                       monomial(_t.monomial) {}
 
-template <typename ValT>
-Term<ValT>::Term(const Term<ValT> &_t)  : coefficient(_t.coefficient), monomial(_t.monomial) {}
+template<typename CoefType, typename PowType>
+Term<CoefType, PowType>::Term(const Term<CoefType, PowType> &_t)  : coefficient(_t.coefficient),
+                                                                    monomial(_t.monomial) {}
 
-template <typename ValT>
-Term<ValT>::Term(Monomial<ValT> &&mon, double coef) : coefficient(coef), monomial(mon) {}
+template<typename CoefType, typename PowType>
+Term<CoefType, PowType>::Term(Monomial<PowType> &&mon, CoefType coef) : coefficient(coef), monomial(mon) {}
 
-template <typename ValT>
-Term<ValT>::Term(const Monomial<ValT> &mon, double coef) : coefficient(coef), monomial(mon) {}
+template<typename CoefType, typename PowType>
+Term<CoefType, PowType>::Term(const Monomial<PowType> &mon, CoefType coef) : coefficient(coef), monomial(mon) {}
 
-template <typename ValT>
-Term<ValT> &Term<ValT>::operator=(Term<ValT> &&t) noexcept {
+template<typename CoefType, typename PowType>
+Term<CoefType, PowType> &Term<CoefType, PowType>::operator=(Term<CoefType, PowType> &&t) noexcept {
     this->coefficient = t.coefficient;
     this->monomial = t.monomial;
     return *this;
 }
 
-template <typename ValT>
-Term<ValT> &Term<ValT>::operator=(const Term<ValT> &t) {
+template<typename CoefType, typename PowType>
+Term<CoefType, PowType> &Term<CoefType, PowType>::operator=(const Term<CoefType, PowType> &t) {
     this->coefficient = t.coefficient;
     this->monomial = t.monomial;
     return *this;
 }
 
-template <typename ValT>
-Term<ValT> &Term<ValT>::operator*=(const Term<ValT> &other) {
+template<typename CoefType, typename PowType>
+Term<CoefType, PowType> &Term<CoefType, PowType>::operator*=(const Term<CoefType, PowType> &other) {
     this->coefficient *= other.coefficient;
     this->monomial *= other.monomial;
     return *this;;
 }
 
-template <typename T>
-bool operator==(const Term<T> &a, const Term<T> &b) {
+template<typename CoefType, typename PowType>
+bool operator==(const Term<CoefType, PowType> &a, const Term<CoefType, PowType> &b) {
     return a.coefficient == b.coefficient && a.monomial == b.monomial;
 }
 
-template <typename T>
-Term<T> operator*(const Term<T> &a, const Term<T> &b) {
-    Term<T> ans(a);
+template<typename CoefType, typename PowType>
+Term<CoefType, PowType> operator*(const Term<CoefType, PowType> &a, const Term<CoefType, PowType> &b) {
+    Term<CoefType, PowType> ans(a);
     ans *= b;
     return ans;
 }
 
-template <typename T>
-std::ostream &operator<<(std::ostream &os, const Term<T> &t) {
+template<typename CoefType, typename PowType>
+std::ostream &operator<<(std::ostream &os, const Term<CoefType, PowType> &t) {
     os << t.coefficient << t.monomial;
     return os;
 }
 
-template <typename T>
-std::pair<Term<T>, bool> operator/(const Term<T> &a, const Term<T> &b) {
+template<typename CoefType, typename PowType>
+std::pair<Term<CoefType, PowType>, bool> operator/(const Term<CoefType, PowType> &a, const Term<CoefType, PowType> &b) {
     auto tmp = a.monomial / b.monomial;
     if (!tmp.second) {
         return std::make_pair(a, false);
     } else {
-        return std::make_pair(Term<T>(tmp.first, a.coefficient / b.coefficient), true);
+        return std::make_pair(Term<CoefType, PowType>(tmp.first, a.coefficient / b.coefficient), true);
     }
 }
 
-template<typename ValT>
-const Monomial<ValT> &Term<ValT>::mon() {
+template<typename CoefType, typename PowType>
+const Monomial<PowType> &Term<CoefType, PowType>::mon() {
     return this->monomial;
 }
 
-template<typename ValT>
-const double Term<ValT>::coef() {
+template<typename CoefType, typename PowType>
+const CoefType &Term<CoefType, PowType>::coef() {
     return this->coefficient;
 }
 
-template<typename ValT>
-const Monomial<ValT> &Term<ValT>::mon() const {
+template<typename CoefType, typename PowType>
+const Monomial<PowType> &Term<CoefType, PowType>::mon() const {
     return this->monomial;
 }
 
-template<typename ValT>
-const double Term<ValT>::coef() const {
+template<typename CoefType, typename PowType>
+const CoefType &Term<CoefType, PowType>::coef() const {
     return this->coefficient;
 }
 
