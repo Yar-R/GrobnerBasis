@@ -14,10 +14,10 @@ int main() {
     for (const auto & t : terms) {
         std::cout << t << std::endl;
     }
-    /*
+    //*
     for (const auto & cmp : comparators) {
         std::cout << "-------------------------" << std::endl;
-        std::sort(terms.begin(), terms.end(), cmp->get_cmp_func());
+        std::sort(terms.begin(), terms.end(), Proxy<uint16_t>(cmp));
         for (const auto & t : terms) {
             std::cout << t << std::endl;
         }
@@ -26,6 +26,6 @@ int main() {
     for (const auto & cmp : comparators) {
         delete cmp;
     }
-     */
+     //*/
     return 0;
 }

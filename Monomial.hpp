@@ -175,6 +175,4 @@ std::pair<Monomial<ValT>, bool> operator/(const Monomial<ValT> &a, const Monomia
 }
 
 
-
-
 #endif //GROBNERBASIS_MONOMIAL_H

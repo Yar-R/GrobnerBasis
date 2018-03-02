@@ -13,8 +13,7 @@ template <typename ValT>
 class Comparator {
 public:
     virtual bool operator()(const Monomial<ValT>& a, const Monomial<ValT>& b) = 0;
-    bool operator()(const Term<ValT>& a, const Term<ValT>& b);
-    std::function<bool(const Monomial<ValT>&, const Monomial<ValT>&)>  get_cmp_func();
+    std::function<bool(const Monomial<ValT>&, const Monomial<ValT>&)>  get_cmp_func();;
 };
 
 template <typename ValT>
@@ -38,11 +37,6 @@ public:
 template <typename ValT>
 std::function<bool(const Monomial<ValT> &, const Monomial<ValT> &)> Comparator<ValT>::get_cmp_func() {
     return [this](const Monomial<ValT> &a, const Monomial<ValT> &b)->bool{ return this->operator()(a, b);};
-}
-
-template<typename ValT>
-bool Comparator<ValT>::operator()(const Term<ValT> &a, const Term<ValT> &b) {
-    return this->operator()(a.mon(), b.mon());
 }
 
 template <typename ValT>
@@ -92,5 +86,29 @@ bool GrevlexComparator<ValT>::operator()(const Monomial<ValT> &a, const Monomial
         return sum_a < sum_b;
     }
 }
+
+template <typename ValT>
+class Proxy
+{
+private:
+    Comparator<ValT> *cmp;
+public:
+    explicit Proxy(Comparator<ValT> *cmp);
+    bool operator()(const Monomial<ValT> &r1, const Monomial<ValT> &r2);
+    bool operator()(const Term<ValT> &r1, const Term<ValT> &r2);
+};
+
+template <typename ValT>
+Proxy<ValT>::Proxy(Comparator<ValT> *cmp) :cmp(cmp) {}
+
+template <typename ValT>
+bool Proxy<ValT>::operator()(const Monomial<ValT> &r1, const Monomial<ValT> &r2) {
+    return this->cmp->operator()(r1, r2);
+}
+
+template <typename ValT>
+bool Proxy<ValT>::operator()(const Term<ValT> &r1, const Term<ValT> &r2) {
+    return this->cmp->operator()(r1.mon(), r2.mon());
+};
 
 #endif //GROBNERBASIS_COMPARATOR_H
