@@ -7,6 +7,7 @@
 
 #include <functional>
 #include <memory>
+#include <cassert>
 #include "Monomial.hpp"
 #include "Term.hpp"
 
@@ -94,8 +95,11 @@ template<typename CoefType, typename PowType>
 class Proxy {
 private:
     std::shared_ptr<Comparator<CoefType, PowType>> cmp;
+    void check();
 public:
     explicit Proxy(std::shared_ptr<Comparator<CoefType, PowType>> cmp);
+    Proxy();
+
 
     bool operator()(const Monomial<PowType> &r1, const Monomial<PowType> &r2);
 
@@ -107,12 +111,25 @@ Proxy<CoefType, PowType>::Proxy(std::shared_ptr<Comparator<CoefType, PowType>> c
 
 template<typename CoefType, typename PowType>
 bool Proxy<CoefType, PowType>::operator()(const Monomial<PowType> &r1, const Monomial<PowType> &r2) {
+    assert(this->cmp == nullptr);
     return this->cmp->operator()(r1, r2);
 }
 
 template<typename CoefType, typename PowType>
 bool Proxy<CoefType, PowType>::operator()(const Term<CoefType, PowType> &r1, const Term<CoefType, PowType> &r2) {
+    this->check();
     return this->cmp->operator()(r1.mon(), r2.mon());
+}
+
+template<typename CoefType, typename PowType>
+Proxy<CoefType, PowType>::Proxy() {
+    this->check();
+    this->cmp = nullptr;
+}
+
+template<typename CoefType, typename PowType>
+void Proxy<CoefType, PowType>::check() {
+    assert(this->cmp != nullptr);
 };
 
 #endif //GROBNERBASIS_COMPARATOR_H

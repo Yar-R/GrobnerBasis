@@ -29,13 +29,13 @@ public:
 
     Term<CoefType, PowType> &operator*=(const Term<CoefType, PowType> &other);
 
-    const Monomial<PowType> &mon();
+    Monomial<PowType> &mon();
 
-    const CoefType& coef();
+    CoefType &coef();
 
     const Monomial<PowType> &mon() const;
 
-    const CoefType& coef() const;
+    const CoefType &coef() const;
 
     template<typename T1, typename T2>
     friend bool operator==(const Term<T1, T2> &a, const Term<T1, T2> &b);
@@ -99,7 +99,10 @@ Term<CoefType, PowType> operator*(const Term<CoefType, PowType> &a, const Term<C
 
 template<typename CoefType, typename PowType>
 std::ostream &operator<<(std::ostream &os, const Term<CoefType, PowType> &t) {
-    os << t.coefficient << t.monomial;
+    if (t.coefficient)
+        os << t.coefficient << t.monomial;
+    else
+        os << t.coefficient;
     return os;
 }
 
@@ -114,12 +117,12 @@ std::pair<Term<CoefType, PowType>, bool> operator/(const Term<CoefType, PowType>
 }
 
 template<typename CoefType, typename PowType>
-const Monomial<PowType> &Term<CoefType, PowType>::mon() {
+Monomial<PowType> &Term<CoefType, PowType>::mon() {
     return this->monomial;
 }
 
 template<typename CoefType, typename PowType>
-const CoefType &Term<CoefType, PowType>::coef() {
+CoefType &Term<CoefType, PowType>::coef() {
     return this->coefficient;
 }
 

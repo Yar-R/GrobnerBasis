@@ -43,6 +43,10 @@ Monomial<ValT> &Monomial<ValT>::operator*=(const Monomial<ValT> &other) {
 
 template<typename ValT>
 std::ostream &operator<<(std::ostream &os, const Monomial<ValT> &a) {
+    if (a.empty()) {
+        os << 0;
+        return os;
+    }
     for (size_t i = 0; i < a.size(); ++i) {
         if (a[i] == 1) {
             os << "x_{" << i << "}";
