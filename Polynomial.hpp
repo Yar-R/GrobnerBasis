@@ -6,6 +6,7 @@
 #define GROBNERBASIS_POLYNOMIAL_H
 
 #include <cassert>
+#include <queue>
 #include "Comparator.hpp"
 #include "Term.hpp"
 
@@ -15,8 +16,10 @@ private:
     bool sorted = false;
 public:
     using std::vector<Term<CoefType, PowType>>::vector;
+    using std::vector<Term<CoefType, PowType>>::at;
+    using std::vector<Term<CoefType, PowType>>::operator[];
 
-    void sort_by(std::shared_ptr<Comparator<CoefType, PowType>> cmp);
+    void sort_by(std::shared_ptr<Comparator<CoefType, PowType>> ptr);
 
     std::shared_ptr<Comparator<CoefType, PowType>> cmp();
 
@@ -40,17 +43,42 @@ public:
     template<typename T1, typename T2>
     friend std::ostream &operator<<(std::ostream &os, const Polynomial<T1, T2> &a);
 
-    template<typename T1, typename T2>
-    friend Polynomial<T1, T2> operator/(const Polynomial<T1, T2> &a, const Polynomial<T1, T2> &b);
+    template <typename Coef, typename Pow>
+    friend Polynomial<Coef, Pow> add_sorted(std::shared_ptr<Comparator<Coef, Pow>> ptr, std::vector<Polynomial<Coef, Pow>>&& list);
 
-    template<typename T1, typename T2>
-    friend Polynomial<T1, T2> operator*(const Polynomial<T1, T2> &a, const Polynomial<T1, T2> &b);
+    template <typename Coef, typename Pow>
+    friend Polynomial<Coef, Pow> add_sorted(std::shared_ptr<Comparator<Coef, Pow>> ptr, const std::vector<Polynomial<Coef, Pow>>& list);
 
-    template<typename T1, typename T2>
-    friend Polynomial<T1, T2> operator+(const Polynomial<T1, T2> &a, const Polynomial<T1, T2> &b);
+    template <typename Coef, typename Pow>
+    friend Polynomial<Coef, Pow> add_and_substract_sorted(std::shared_ptr<Comparator<Coef, Pow>> ptr, std::vector<Polynomial<Coef, Pow>>&& list_p, std::vector<Polynomial<Coef, Pow>>&& list_n);
 
-    template<typename T1, typename T2>
-    friend Polynomial<T1, T2> operator-(const Polynomial<T1, T2> &a, const Polynomial<T1, T2> &b);
+    template <typename Coef, typename Pow>
+    friend Polynomial<Coef, Pow> add_and_substract_sorted(std::shared_ptr<Comparator<Coef, Pow>> ptr, std::vector<Polynomial<Coef, Pow>>&& list_p, const std::vector<Polynomial<Coef, Pow>>& list_n);
+
+    template <typename Coef, typename Pow>
+    friend Polynomial<Coef, Pow> add_and_substract_sorted(std::shared_ptr<Comparator<Coef, Pow>> ptr, const std::vector<Polynomial<Coef, Pow>>& list_p, std::vector<Polynomial<Coef, Pow>>&& list_n);
+
+    template <typename Coef, typename Pow>
+    friend Polynomial<Coef, Pow> add_and_substract_sorted(std::shared_ptr<Comparator<Coef, Pow>> ptr, const std::vector<Polynomial<Coef, Pow>>& list_p, const std::vector<Polynomial<Coef, Pow>>& list_n);
+
+    template <typename Coef, typename Pow>
+    friend Polynomial<Coef, Pow> add(std::shared_ptr<Comparator<Coef, Pow>> ptr, std::vector<Polynomial<Coef, Pow>>&& list);
+
+    template <typename Coef, typename Pow>
+    friend Polynomial<Coef, Pow> add(std::shared_ptr<Comparator<Coef, Pow>> ptr, const std::vector<Polynomial<Coef, Pow>>& list);
+
+    template <typename Coef, typename Pow>
+    friend Polynomial<Coef, Pow> add_and_substract(std::shared_ptr<Comparator<Coef, Pow>> ptr, std::vector<Polynomial<Coef, Pow>>&& list_p, std::vector<Polynomial<Coef, Pow>>&& list_n);
+
+    template <typename Coef, typename Pow>
+    friend Polynomial<Coef, Pow> add_and_substract(std::shared_ptr<Comparator<Coef, Pow>> ptr, std::vector<Polynomial<Coef, Pow>>&& list_p, const std::vector<Polynomial<Coef, Pow>>& list_n);
+
+    template <typename Coef, typename Pow>
+    friend Polynomial<Coef, Pow> add_and_substract(std::shared_ptr<Comparator<Coef, Pow>> ptr, const std::vector<Polynomial<Coef, Pow>>& list_p, std::vector<Polynomial<Coef, Pow>>&& list_n);
+
+    template <typename Coef, typename Pow>
+    friend Polynomial<Coef, Pow> add_and_substract(std::shared_ptr<Comparator<Coef, Pow>> ptr, const std::vector<Polynomial<Coef, Pow>>& list_p, const std::vector<Polynomial<Coef, Pow>>& list_n);
+
 
 };
 
@@ -133,5 +161,343 @@ template<typename CoefType, typename PowType>
 void Polynomial<CoefType, PowType>::__0_fix__() const {
     this->push_back(Term<CoefType, PowType>());
 }
+
+template<typename Coef, typename Pow>
+Polynomial<Coef, Pow>
+add_sorted(std::shared_ptr<Comparator<Coef, Pow>> ptr, std::vector<Polynomial<Coef, Pow>>&& list) {
+    auto ans =  Polynomial<Coef, Pow>();
+    auto cmp = [ptr](const std::pair<Term<Coef, Pow>, size_t>& a, const std::pair<Term<Coef, Pow>, size_t>& b) {
+        Proxy<Coef, Pow> p(ptr);
+        return !p(a.first, b.first);
+    };
+    Proxy<Coef, Pow> p(ptr);
+    std::priority_queue<std::pair<Term<Coef, Pow>, size_t>, std::vector<std::pair<Term<Coef, Pow>, size_t>>, decltype(cmp)> heap(cmp);
+    std::vector<size_t> a(list.size(), 1);
+    for (size_t i = 0; i < list.size(); ++i) {
+        heap.push(std::make_pair(list[i][0], i));
+    }
+    size_t idx;
+    while (!heap.empty()) {
+        auto term = heap.top().first;
+        if (!ans.empty()) {
+            if (ans.back().mon() == term.mon()) {
+                ans.back().coef() += term.coef();
+            } else {
+                ans.push_back(term);
+            }
+        } else {
+            ans.push_back(term);
+        }
+        idx = heap.top().second;
+        heap.pop();
+        if (a[idx] < list[idx].size()) {
+            heap.push(std::make_pair(list[idx][a[idx]], idx));
+            ++a[idx];
+        }
+    }
+    return ans;
+}
+
+template<typename Coef, typename Pow>
+Polynomial<Coef, Pow>
+add_sorted(std::shared_ptr<Comparator<Coef, Pow>> ptr, const std::vector<Polynomial<Coef, Pow>>& list) {
+    auto ans =  Polynomial<Coef, Pow>();
+    auto cmp = [ptr](const std::pair<Term<Coef, Pow>, size_t>& a, const std::pair<Term<Coef, Pow>, size_t>& b) {
+        Proxy<Coef, Pow> p(ptr);
+        return !p(a.first, b.first);
+    };
+    Proxy<Coef, Pow> p(ptr);
+    std::priority_queue<std::pair<Term<Coef, Pow>, size_t>, std::vector<std::pair<Term<Coef, Pow>, size_t>>, decltype(cmp)> heap(cmp);
+    std::vector<size_t> a(list.size(), 1);
+    for (size_t i = 0; i < list.size(); ++i) {
+        heap.push(std::make_pair(list[i][0], i));
+    }
+    size_t idx;
+    while (!heap.empty()) {
+        auto term = heap.top().first;
+        if (!ans.empty()) {
+            if (ans.back().mon() == term.mon()) {
+                ans.back().coef() += term.coef();
+            } else {
+                ans.push_back(term);
+            }
+        } else {
+            ans.push_back(term);
+        }
+        idx = heap.top().second;
+        heap.pop();
+        if (a[idx] < list[idx].size()) {
+            heap.push(std::make_pair(list[idx][a[idx]], idx));
+            ++a[idx];
+        }
+    }
+    return ans;
+}
+
+template<typename Coef, typename Pow>
+Polynomial<Coef, Pow>
+add_and_substract_sorted(std::shared_ptr<Comparator<Coef, Pow>> ptr, std::vector<Polynomial<Coef, Pow>> &&list_p,
+                         std::vector<Polynomial<Coef, Pow>> &&list_n) {
+    auto ans =  Polynomial<Coef, Pow>();
+    auto cmp = [ptr](const std::pair<Term<Coef, Pow>, size_t>& a, const std::pair<Term<Coef, Pow>, size_t>& b) {
+        Proxy<Coef, Pow> p(ptr);
+        return !p(a.first, b.first);
+    };
+    std::priority_queue<std::pair<Term<Coef, Pow>, size_t>, std::vector<std::pair<Term<Coef, Pow>, std::pair<char, size_t>>>, decltype(cmp)> heap(cmp);
+    std::vector<size_t> p(list_p.size(), 1), n(list_n.size(), 1);
+    for (size_t i = 0; i < list_p.size(); ++i) {
+        heap.push(std::make_pair(list_p[i][0], std::make_pair('p', i)));
+    }
+    size_t idx;
+    char l;
+    while (!heap.empty()) {
+        auto term = heap.top().first;
+        if (heap.top().second.first == 'n') {
+            term = -term;
+        }
+        if (!ans.empty()) {
+            if (ans.back().mon() == term.mon()) {
+                ans.back().coef() += term.coef();
+            } else {
+                ans.push_back(term);
+            }
+        } else {
+            ans.push_back(term);
+        }
+        idx = heap.top().second.second;
+        l = heap.top().second.first;
+        heap.pop();
+        if (l == 'p') {
+            if (p[idx] < list_p[idx].size()) {
+                heap.push(std::make_pair(list_p[idx][p[idx]], idx));
+                ++p[idx];
+            }
+        } else {
+            if (n[idx] < list_n[idx].size()) {
+                heap.push(std::make_pair(list_n[idx][n[idx]], idx));
+                ++n[idx];
+            }
+        }
+    }
+    return ans;
+}
+
+template<typename Coef, typename Pow>
+Polynomial<Coef, Pow>
+add_and_substract_sorted(std::shared_ptr<Comparator<Coef, Pow>> ptr, std::vector<Polynomial<Coef, Pow>> &&list_p,
+                         const std::vector<Polynomial<Coef, Pow>> &list_n) {
+    auto ans =  Polynomial<Coef, Pow>();
+    auto cmp = [ptr](const std::pair<Term<Coef, Pow>, size_t>& a, const std::pair<Term<Coef, Pow>, size_t>& b) {
+        Proxy<Coef, Pow> p(ptr);
+        return !p(a.first, b.first);
+    };
+    std::priority_queue<std::pair<Term<Coef, Pow>, size_t>, std::vector<std::pair<Term<Coef, Pow>, std::pair<char, size_t>>>, decltype(cmp)> heap(cmp);
+    std::vector<size_t> p(list_p.size(), 1), n(list_n.size(), 1);
+    for (size_t i = 0; i < list_p.size(); ++i) {
+        heap.push(std::make_pair(list_p[i][0], std::make_pair('p', i)));
+    }
+    size_t idx;
+    char l;
+    while (!heap.empty()) {
+        auto term = heap.top().first;
+        if (heap.top().second.first == 'n') {
+            term = -term;
+        }
+        if (!ans.empty()) {
+            if (ans.back().mon() == term.mon()) {
+                ans.back().coef() += term.coef();
+            } else {
+                ans.push_back(term);
+            }
+        } else {
+            ans.push_back(term);
+        }
+        idx = heap.top().second.second;
+        l = heap.top().second.first;
+        heap.pop();
+        if (l == 'p') {
+            if (p[idx] < list_p[idx].size()) {
+                heap.push(std::make_pair(list_p[idx][p[idx]], idx));
+                ++p[idx];
+            }
+        } else {
+            if (n[idx] < list_n[idx].size()) {
+                heap.push(std::make_pair(list_n[idx][n[idx]], idx));
+                ++n[idx];
+            }
+        }
+    }
+    return ans;
+}
+
+template<typename Coef, typename Pow>
+Polynomial<Coef, Pow>
+add_and_substract_sorted(std::shared_ptr<Comparator<Coef, Pow>> ptr, const std::vector<Polynomial<Coef, Pow>> &list_p,
+                         std::vector<Polynomial<Coef, Pow>> &&list_n) {
+    auto ans =  Polynomial<Coef, Pow>();
+    auto cmp = [ptr](const std::pair<Term<Coef, Pow>, size_t>& a, const std::pair<Term<Coef, Pow>, size_t>& b) {
+        Proxy<Coef, Pow> p(ptr);
+        return !p(a.first, b.first);
+    };
+    std::priority_queue<std::pair<Term<Coef, Pow>, size_t>, std::vector<std::pair<Term<Coef, Pow>, std::pair<char, size_t>>>, decltype(cmp)> heap(cmp);
+    std::vector<size_t> p(list_p.size(), 1), n(list_n.size(), 1);
+    for (size_t i = 0; i < list_p.size(); ++i) {
+        heap.push(std::make_pair(list_p[i][0], std::make_pair('p', i)));
+    }
+    size_t idx;
+    char l;
+    while (!heap.empty()) {
+        auto term = heap.top().first;
+        if (heap.top().second.first == 'n') {
+            term = -term;
+        }
+        if (!ans.empty()) {
+            if (ans.back().mon() == term.mon()) {
+                ans.back().coef() += term.coef();
+            } else {
+                ans.push_back(term);
+            }
+        } else {
+            ans.push_back(term);
+        }
+        idx = heap.top().second.second;
+        l = heap.top().second.first;
+        heap.pop();
+        if (l == 'p') {
+            if (p[idx] < list_p[idx].size()) {
+                heap.push(std::make_pair(list_p[idx][p[idx]], idx));
+                ++p[idx];
+            }
+        } else {
+            if (n[idx] < list_n[idx].size()) {
+                heap.push(std::make_pair(list_n[idx][n[idx]], idx));
+                ++n[idx];
+            }
+        }
+    }
+    return ans;
+}
+
+template<typename Coef, typename Pow>
+Polynomial<Coef, Pow>
+add_and_substract_sorted(std::shared_ptr<Comparator<Coef, Pow>> ptr, const std::vector<Polynomial<Coef, Pow>> &list_p,
+                         const std::vector<Polynomial<Coef, Pow>> &list_n) {
+    auto ans =  Polynomial<Coef, Pow>();
+    auto cmp = [ptr](const std::pair<Term<Coef, Pow>, size_t>& a, const std::pair<Term<Coef, Pow>, size_t>& b) {
+        Proxy<Coef, Pow> p(ptr);
+        return !p(a.first, b.first);
+    };
+    std::priority_queue<std::pair<Term<Coef, Pow>, size_t>, std::vector<std::pair<Term<Coef, Pow>, std::pair<char, size_t>>>, decltype(cmp)> heap(cmp);
+    std::vector<size_t> p(list_p.size(), 1), n(list_n.size(), 1);
+    for (size_t i = 0; i < list_p.size(); ++i) {
+        heap.push(std::make_pair(list_p[i][0], std::make_pair('p', i)));
+    }
+    size_t idx;
+    char l;
+    while (!heap.empty()) {
+        auto term = heap.top().first;
+        if (heap.top().second.first == 'n') {
+            term = -term;
+        }
+        if (!ans.empty()) {
+            if (ans.back().mon() == term.mon()) {
+                ans.back().coef() += term.coef();
+            } else {
+                ans.push_back(term);
+            }
+        } else {
+            ans.push_back(term);
+        }
+        idx = heap.top().second.second;
+        l = heap.top().second.first;
+        heap.pop();
+        if (l == 'p') {
+            if (p[idx] < list_p[idx].size()) {
+                heap.push(std::make_pair(list_p[idx][p[idx]], std::make_pair(l, idx)));
+                ++p[idx];
+            }
+        } else {
+            if (n[idx] < list_n[idx].size()) {
+                heap.push(std::make_pair(list_n[idx][n[idx]], std::make_pair(l, idx)));
+                ++n[idx];
+            }
+        }
+    }
+    return ans;
+}
+
+template<typename Coef, typename Pow>
+Polynomial<Coef, Pow> add(std::shared_ptr<Comparator<Coef, Pow>> ptr, std::vector<Polynomial<Coef, Pow>> &&list) {
+    for (Polynomial<Coef, Pow>& element : list) {
+        element.sort_by(ptr);
+    }
+    return add_sorted(ptr, list);
+}
+
+template<typename Coef, typename Pow>
+Polynomial<Coef, Pow> add(std::shared_ptr<Comparator<Coef, Pow>> ptr, const std::vector<Polynomial<Coef, Pow>> &list) {
+    std::vector<Polynomial<Coef, Pow>> sorted = list;
+    for (Polynomial<Coef, Pow>& element : sorted) {
+        element.sort_by(ptr);
+    }
+    return add_sorted(ptr, sorted);
+}
+
+template<typename Coef, typename Pow>
+Polynomial<Coef, Pow>
+add_and_substract(std::shared_ptr<Comparator<Coef, Pow>> ptr, std::vector<Polynomial<Coef, Pow>> &&list_p,
+                  std::vector<Polynomial<Coef, Pow>> &&list_n) {
+    for (Polynomial<Coef, Pow>& element : list_p) {
+        element.sort_by(ptr);
+    }
+    for (Polynomial<Coef, Pow>& element : list_n) {
+        element.sort_by(ptr);
+    }
+    return add_and_substract_sorted(ptr, list_p, list_n);
+}
+
+template<typename Coef, typename Pow>
+Polynomial<Coef, Pow>
+add_and_substract(std::shared_ptr<Comparator<Coef, Pow>> ptr, std::vector<Polynomial<Coef, Pow>> &&list_p,
+                  const std::vector<Polynomial<Coef, Pow>> &list_n) {
+    for (Polynomial<Coef, Pow>& element : list_p) {
+        element.sort_by(ptr);
+    }
+    std::vector<Polynomial<Coef, Pow>> sorted = list_n;
+    for (Polynomial<Coef, Pow>& element : sorted) {
+        element.sort_by(ptr);
+    }
+    return add_and_substract_sorted(ptr, list_p, sorted);
+}
+
+template<typename Coef, typename Pow>
+Polynomial<Coef, Pow>
+add_and_substract(std::shared_ptr<Comparator<Coef, Pow>> ptr, const std::vector<Polynomial<Coef, Pow>> &list_p,
+                  std::vector<Polynomial<Coef, Pow>> &&list_n) {
+    for (Polynomial<Coef, Pow>& element : list_n) {
+        element.sort_by(ptr);
+    }
+    std::vector<Polynomial<Coef, Pow>> sorted = list_p;
+    for (Polynomial<Coef, Pow>& element : sorted) {
+        element.sort_by(ptr);
+    }
+    return add_and_substract_sorted(ptr, sorted, list_n);
+}
+
+template<typename Coef, typename Pow>
+Polynomial<Coef, Pow>
+add_and_substract(std::shared_ptr<Comparator<Coef, Pow>> ptr, const std::vector<Polynomial<Coef, Pow>> &list_p,
+                  const std::vector<Polynomial<Coef, Pow>> &list_n) {
+    std::vector<Polynomial<Coef, Pow>> sorted_p = list_p;
+    for (Polynomial<Coef, Pow>& element : sorted_p) {
+        element.sort_by(ptr);
+    }
+    std::vector<Polynomial<Coef, Pow>> sorted_n = list_n;
+    for (Polynomial<Coef, Pow>& element : sorted_n) {
+        element.sort_by(ptr);
+    }
+    return add_and_substract_sorted(ptr, sorted_p, sorted_n);
+}
+
 
 #endif //GROBNERBASIS_POLYNOMIAL_H

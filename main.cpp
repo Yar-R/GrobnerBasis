@@ -6,7 +6,6 @@
 #include "Term.hpp"
 #include "Polynomial.hpp"
 
-
 int main() {
     //*
     std::vector<Monomial<uint16_t>> monomials({{1, 0, 2},
@@ -39,5 +38,8 @@ int main() {
     Polynomial<double, uint16_t> p2;
     std::cout << p2.LC() << std::endl << p2.LM() << std::endl << p2.LT() << std::endl;
 
+    poly.sort_by(comparators[0]);
+    std::cout << poly << std::endl;
+    std::cout << add_and_substract(comparators[0], {poly, poly}, {poly, poly, poly}) << std::endl;
     return 0;
 }

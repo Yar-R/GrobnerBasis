@@ -29,6 +29,11 @@ public:
 
     Term<CoefType, PowType> &operator*=(const Term<CoefType, PowType> &other);
 
+    template<typename Numeric>
+    Term<CoefType, PowType> &operator*=(Numeric n);
+
+    Term<CoefType, PowType> &operator-();
+
     Monomial<PowType> &mon();
 
     CoefType &coef();
@@ -134,6 +139,18 @@ const Monomial<PowType> &Term<CoefType, PowType>::mon() const {
 template<typename CoefType, typename PowType>
 const CoefType &Term<CoefType, PowType>::coef() const {
     return this->coefficient;
+}
+
+template<typename CoefType, typename PowType>
+Term<CoefType, PowType> &Term<CoefType, PowType>::operator-() {
+    return (*this) *= -1;
+}
+
+template<typename CoefType, typename PowType>
+template<typename Numeric>
+Term<CoefType, PowType> &Term<CoefType, PowType>::operator*=(Numeric n) {
+    this->coef() *= n;
+    return *this;
 }
 
 #endif //GROBNERBASIS_TERM_H
