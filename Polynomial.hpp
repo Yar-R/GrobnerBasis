@@ -79,7 +79,8 @@ public:
     template <typename Coef, typename Pow>
     friend Polynomial<Coef, Pow> add_and_substract(std::shared_ptr<Comparator<Coef, Pow>> ptr, const std::vector<Polynomial<Coef, Pow>>& list_p, const std::vector<Polynomial<Coef, Pow>>& list_n);
 
-
+    template <typename Coef, typename Pow>
+    friend Polynomial<Coef, Pow> mul_sorted(std::shared_ptr<Comparator<Coef, Pow>> ptr, const Polynomial<Coef, Pow>& a, const Polynomial<Coef, Pow>& b);
 };
 
 template<typename CoefType, typename PowType>
@@ -497,6 +498,28 @@ add_and_substract(std::shared_ptr<Comparator<Coef, Pow>> ptr, const std::vector<
         element.sort_by(ptr);
     }
     return add_and_substract_sorted(ptr, sorted_p, sorted_n);
+}
+
+template<typename Coef, typename Pow>
+Polynomial<Coef, Pow>
+mul_sorted(std::shared_ptr<Comparator<Coef, Pow>> ptr, const Polynomial<Coef, Pow> &a, const Polynomial<Coef, Pow> &b) {
+    std::vector<Polynomial<Coef, Pow>> list;
+    if (a.size() < b.size()) {
+        list.emplace_back(Polynomial<Coef, Pow>());
+        for (const Term<Coef, Pow>& mul : a) {
+            for (const Term<Coef, Pow>& elem : b) {
+                list.back().push_back(elem * mul);
+            }
+        }
+    } else {
+        list.emplace_back(Polynomial<Coef, Pow>());
+        for (const Term<Coef, Pow>& mul : b) {
+            for (const Term<Coef, Pow>& elem : a) {
+                list.back().push_back(elem * mul);
+            }
+        }
+    }
+    return add_sorted(ptr, list);
 }
 
 
