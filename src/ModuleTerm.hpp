@@ -6,7 +6,6 @@
 #define GROBNERBASIS_MODULETERM_H
 
 #include "Term.hpp"
-#include "Polynomial.hpp"
 
 typedef Term<Term<double, Monomial<int64_t>>, size_t > ModuleTerm;
 

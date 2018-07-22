@@ -6,6 +6,8 @@
 #define GROBNERBASIS_MODULEELEMENT_H
 
 #include "ModuleTerm.hpp"
+#include "Polynomial.hpp"
+#include "Comparator.hpp"
 
 typedef std::vector<ModuleTerm> ModuleElement;
 
