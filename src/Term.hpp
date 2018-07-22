@@ -52,5 +52,14 @@ bool operator==(const Term<Coef, Monom>& a, const Term<Coef, Monom>& b) {
     return a.coef == b.coef && (a.coef == 0 || a.monom == b.monom);
 }
 
+template <typename Coef, typename Monom>
+std::experimental::optional<Term<Coef, Monom>> operator/(const Term<Coef, Monom>& a, const Term<Coef, Monom>& b) {
+    auto m = a.monom / b.monom;
+    if (!m) {
+        return {};
+    }
+    return Term<Coef, Monom>(a.coef / b.coef, get_value(m));
+
+}
 
 #endif //GROBNERBASIS_TERM_H

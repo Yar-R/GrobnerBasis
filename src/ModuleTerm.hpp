@@ -5,8 +5,12 @@
 #ifndef GROBNERBASIS_MODULETERM_H
 #define GROBNERBASIS_MODULETERM_H
 
-#include "Term.hpp"
+#include "Polynomial.hpp"
 
-typedef Term<Term<double, Monomial<int64_t>>, size_t > ModuleTerm;
+typedef Term<Polynomial, size_t > ModuleTerm;
+
+ModuleTerm operator*(const ModuleTerm& mt, const Term<double, Monomial<int64_t>>& t) {
+    return ModuleTerm(mt.coef * t, mt.monom);
+}
 
 #endif //GROBNERBASIS_MODULETERM_H
