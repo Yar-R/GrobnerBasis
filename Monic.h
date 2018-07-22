@@ -6,8 +6,20 @@
 #define GROBNERBASIS_MONIC_H
 
 
-class Monic {
+#include "Polynomial.h"
 
+class Monic {
+private:
+    Term _poly;
+    size_t _idx;
+public:
+    Term & coef();
+
+    const Term & coef() const;
+
+    size_t &axis();
+
+    const size_t &axis() const;
 };
 
 
