@@ -1,25 +1,23 @@
 //
-// Created by Yaroslav Rebenko on 21.07.2018.
+// Created by yaroslav on 7/24/18.
 //
 
-#ifndef GROBNERBASIS_COMPARATOR_H
-#define GROBNERBASIS_COMPARATOR_H
+#ifndef GROBNERBASIS_MONOMIALORDER_HPP
+#define GROBNERBASIS_MONOMIALORDER_HPP
 
-#include "Monomial.hpp"
-
-template <typename Pow>
-class Comparator {
+template<typename Pow>
+class MonomialOrder {
 public:
     virtual bool operator()(const Monomial<Pow>& a, const Monomial<Pow>& b) const = 0;
 };
 
-template <typename Pow>
-class Lex : public Comparator<Pow> {
+template<typename Pow>
+class Lex : public MonomialOrder<Pow> {
     bool operator()(const Monomial<Pow>& a, const Monomial<Pow>& b) const final;
 };
 
 template<typename Pow>
-bool Lex<Pow>::operator()(const Monomial<Pow> &a, const Monomial<Pow> &b) const{
+bool Lex<Pow>::operator()(const Monomial<Pow>& a, const Monomial<Pow>& b) const {
     size_t i = 0;
     for (; i < a.size() && i < b.size(); ++i) {
         if (a[i] != b[i]) {
@@ -29,4 +27,5 @@ bool Lex<Pow>::operator()(const Monomial<Pow> &a, const Monomial<Pow> &b) const{
     return i < a.size();
 }
 
-#endif //GROBNERBASIS_COMPARATOR_H
+
+#endif //GROBNERBASIS_MONOMIALORDER_HPP

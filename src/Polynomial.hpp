@@ -9,11 +9,13 @@
 #include <queue>
 #include "Term.hpp"
 #include "Monomial.hpp"
-#include "Comparator.hpp"
+#include "MonomialOrder.hpp"
 
-typedef std::vector<Term<double, Monomial<int64_t>>> Polynomial;
+template<typename Coef, typename Pow>
+using Polynomial = std::vector<Term<Coef, Monomial<Pow>>>;
 
-Polynomial& operator +=(Polynomial& a, const Term<double, Monomial<int64_t>>& b) {
+template<typename Coef, typename Pow>
+Polynomial<Coef, Pow>& operator+=(Polynomial<Coef, Pow>& a, const Term<Coef, Monomial<Pow>>& b) {
     if (!a.empty() && a.back().monom == b.monom) {
         a.back().coef += b.coef;
     } else {
@@ -22,29 +24,33 @@ Polynomial& operator +=(Polynomial& a, const Term<double, Monomial<int64_t>>& b)
     return a;
 }
 
-Polynomial& operator *=(Polynomial& a, const Term<double, Monomial<int64_t>>& b) {
+template<typename Coef, typename Pow>
+Polynomial<Coef, Pow>& operator*=(Polynomial<Coef, Pow>& a, const Term<Coef, Monomial<Pow>>& b) {
     for (auto& element : a) {
         element *= b;
     }
     return a;
 }
 
-Polynomial operator+(const Polynomial& a, const Term<double, Monomial<int64_t>>& b) {
+template<typename Coef, typename Pow>
+Polynomial<Coef, Pow> operator+(const Polynomial<Coef, Pow>& a, const Term<Coef, Monomial<Pow>>& b) {
     auto ans = a;
     ans += b;
     return ans;
 }
 
-Polynomial operator*(const Polynomial& a, const Term<double, Monomial<int64_t>>& b) {
+template<typename Coef, typename Pow>
+Polynomial<Coef, Pow> operator*(const Polynomial<Coef, Pow>& a, const Term<Coef, Monomial<Pow>>& b) {
     auto ans = a;
     ans *= b;
     return ans;
 }
 
-Polynomial add(const Comparator<int64_t>& cmp, const Polynomial& a, const Polynomial& b) {
+template<typename Coef, typename Pow>
+Polynomial<Coef, Pow> add(const MonomialOrder<Pow>& cmp, const Polynomial<Coef, Pow>& a, const Polynomial<Coef, Pow>& b) {
     size_t i = 0;
     size_t j = 0;
-    Polynomial ans;
+    Polynomial<Coef, Pow> ans;
     while (i < a.size() && j < b.size()) {
         if (cmp(a[i].monom, b[j].monom)) {
             ans += a[i++];
@@ -61,13 +67,16 @@ Polynomial add(const Comparator<int64_t>& cmp, const Polynomial& a, const Polyno
     return ans;
 }
 
-Polynomial mul(const Comparator<int64_t>& cmp, const Polynomial& a, const Polynomial& b) {
-    Polynomial ans;
+template<typename Coef, typename Pow>
+Polynomial<Coef, Pow> mul(const MonomialOrder<Pow>& cmp, const Polynomial<Coef, Pow>& a, const Polynomial<Coef, Pow>& b) {
+    Polynomial<Coef, Pow> ans;
     std::vector<size_t> indexes(b.size());
-    auto cmp2 = [&cmp](const std::pair<size_t, Term<double, Monomial<int64_t>>>& a, const std::pair<size_t, Term<double, Monomial<int64_t>>>& b) mutable {
+    auto cmp2 = [&cmp](const std::pair<size_t, Term<Coef, Monomial<Pow>>>& a,
+                       const std::pair<size_t, Term<Coef, Monomial<Pow>>>& b) mutable {
         return cmp(b.second.monom, a.second.monom);
     };
-    std::priority_queue<std::pair<size_t, Term<double, Monomial<int64_t>>>, std::vector<std::pair<size_t, Term<double, Monomial<int64_t>>>>, decltype(cmp2)> queue(cmp2);
+    std::priority_queue<std::pair<size_t, Term<Coef, Monomial<Pow>>>, std::vector<std::pair<size_t, Term<Coef, Monomial<Pow>>>>, decltype(cmp2)> queue(
+            cmp2);
     for (size_t i = 0; i < b.size(); ++i) {
         queue.push(std::make_pair(i, a[0] * b[i]));
     }

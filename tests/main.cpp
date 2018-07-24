@@ -4,12 +4,12 @@
 #define CATCH_CONFIG_MAIN
 
 #include "catch.hpp"
-#include "../src/ModuleTerm.hpp"
+#include "../src/ModuleMonomial.hpp"
 #include "../src/Monomial.hpp"
 #include "../src/Term.hpp"
 #include "../src/ModuleElement.hpp"
 #include "../src/Polynomial.hpp"
-#include "../src/Comparator.hpp"
+#include "../src/MonomialOrder.hpp"
 
 bool test_monomial_mul_1() {
     Monomial<int> a = {1, 1, 1};
@@ -92,36 +92,36 @@ TEST_CASE( "Term Sum" ) {
 
 
 bool polynomial_add_term() {
-    Polynomial a = {{1, {2, 1}}, {1, {1, 1}}};
-    Polynomial b = {{1, {1, 1}}};
+    Polynomial<double, int> a = {{1, {2, 1}}, {1, {1, 1}}};
+    Polynomial<double, int> b = {{1, {1, 1}}};
     a += b[0];
-    Polynomial c = {{1, {2, 1}}, {2, {1, 1}}};
+    Polynomial<double, int> c = {{1, {2, 1}}, {2, {1, 1}}};
     return a == c;
 }
 
 bool polynomial_mul_term() {
-    Polynomial a = {{1, {2, 1}}, {1, {1, 1}}};
-    Polynomial b = {{1, {1, 1}}};
+    Polynomial<double, int> a = {{1, {2, 1}}, {1, {1, 1}}};
+    Polynomial<double, int> b = {{1, {1, 1}}};
     a *= b[0];
-    Polynomial c = {{1, {3, 2}}, {1, {2, 2}}};
+    Polynomial<double, int> c = {{1, {3, 2}}, {1, {2, 2}}};
     return a == c;
 }
 
 bool polynomial_add() {
-    auto cmp = Lex<int64_t>();
-    Polynomial a = {{2, {2, 2}}, {1, {1, 1}}};
-    Polynomial b = {{3, {1, 1}}, {3, {}}};
-    a = std::move(add(std::ref(cmp), a, b));
-    Polynomial c = {{2, {2, 2}}, {4, {1, 1}}, {3, {}}};
+    auto cmp = Lex<int>();
+    Polynomial<double, int> a = {{2, {2, 2}}, {1, {1, 1}}};
+    Polynomial<double, int> b = {{3, {1, 1}}, {3, {}}};
+    a = std::move(add(cmp, a, b));
+    Polynomial<double, int> c = {{2, {2, 2}}, {4, {1, 1}}, {3, {}}};
     return a == c;
 }
 
 bool polynomial_mul() {
-    auto cmp = Lex<int64_t>();
-    Polynomial a = {{3, {3, 10}}, {1, {2, 1}}, {10, {0, 1}}};
-    Polynomial b = {{1, {1, 9}}, {1, {}}};
-    a = std::move(mul(std::ref(cmp), a, b));
-    Polynomial c = {{3, {4, 19}}, {4, {3, 10}}, {1, {2, 1}}, {10, {1, 10}}, {10, {0, 1}}};
+    auto cmp = Lex<int>();
+    Polynomial<double, int> a = {{3, {3, 10}}, {1, {2, 1}}, {10, {0, 1}}};
+    Polynomial<double, int> b = {{1, {1, 9}}, {1, {}}};
+    a = std::move(mul(cmp, a, b));
+    Polynomial<double, int> c = {{3, {4, 19}}, {4, {3, 10}}, {1, {2, 1}}, {10, {1, 10}}, {10, {0, 1}}};
     return a == c;
 }
 
@@ -142,20 +142,20 @@ TEST_CASE( "Polynomial mul" ) {
 }
 
 bool bar() {
-    std::vector<Polynomial> i = {
+    std::vector<Polynomial<double, int>> i = {
             {{1, {}}},
             {{2, {1, 1}}},
             {{-1, {}}, {-4, {1, 1}}},
             {{-1, {1, 1}}}
     };
-    ModuleElement e = {
+    ModuleElement<int> e = {
             {{1, {}}, 0},
             {{1, {}}, 1},
             {{1, {}}, 2},
             {{-2, {}}, 3}
     };
-    auto cmp = Lex<int64_t>();
-    return bar(std::ref(cmp), i, e).empty();
+    auto cmp = Lex<int>();
+    return bar(cmp, i, e).empty();
 }
 
 TEST_CASE( "t1" ) {
