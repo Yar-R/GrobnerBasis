@@ -61,7 +61,7 @@ template<typename Coef, typename Pow>
 Polynomial<Coef, Pow> bar(const MonomialOrder<Pow>& cmp, const Input<Coef, Pow>& input, ModuleElement<Pow> module_element) {
     Polynomial<Coef, Pow> ans;
     for (const auto& term : module_element) {
-        add(cmp, ans, input[term.monom] * term.coef);
+        ans = add(cmp, ans, input[term.monom] * term.coef);
     }
     return ans;
 }
@@ -82,5 +82,15 @@ std::experimental::optional<ModuleElement<Pow>> sreduce(const MonomialOrder<Pow>
     }
     return substract(Cmp, a, reducer * get_value(b));
 }
+
+template <typename Coef, typename Pow>
+std::pair<ModuleElement<Pow>, ModuleElement<Pow>> spair(const Input<Coef, Pow>& input, const MonomialOrder<Pow>& cmp, const ModuleElement<Pow>& a, const ModuleElement<Pow>& b) {
+    auto abar = bar(cmp, input, a);
+    auto bbar = bar(cmp, input, b);
+    auto lta = abar[0];
+    auto ltb = bbar[0];
+    auto g = gcd(lta, ltb);
+    return std::make_pair(a * get_value(ltb / g), b * get_value(lta / g));
+};
 
 #endif //GROBNERBASIS_MODULEELEMENT_H

@@ -145,19 +145,54 @@ bool bar() {
     std::vector<Polynomial<double, int>> i = {
             {{1, {}}},
             {{2, {1, 1}}},
-            {{-1, {}}, {-4, {1, 1}}},
+            {{-4, {1, 1}}, {-1, {}}},
             {{-1, {1, 1}}}
     };
     ModuleElement<int> e = {
-            {{1, {}}, 0},
             {{1, {}}, 1},
             {{1, {}}, 2},
             {{-2, {}}, 3}
     };
     auto cmp = Lex<int>();
-    return bar(cmp, i, e).empty();
+    auto x = bar(cmp, i, e);
+    return x == Polynomial<double, int>({{-1, {}}});
 }
 
-TEST_CASE( "t1" ) {
+TEST_CASE( "Bar" ) {
     REQUIRE( bar() );
+}
+
+bool term_gcd() {
+    Term<double, Monomial<int> > a(2, {2, 1});
+    Term<double, Monomial<int> > b(1, {1, 1});
+    Term<double, Monomial<int> > c(1, {1, 1});
+    return gcd(a, b) == c;
+}
+
+TEST_CASE( "Term gcd" ) {
+    REQUIRE( term_gcd() );
+}
+
+bool spair() {
+    std::vector<Polynomial<double, int>> i = {
+            {{1, {}}},
+            {{2, {1, 1}}},
+            {{-4, {1, 1}}, {-1, {}}},
+            {{-1, {1, 1}}}
+    };
+    ModuleElement<int> e = {
+            {{1, {}}, 1},
+            {{1, {}}, 2},
+            {{-2, {}}, 3}
+    };
+    ModuleElement<int> e2 = {
+            {{1, {}}, 0},
+    };
+    auto cmp = Lex<int>();
+    auto t = spair(i, cmp, e, e2);
+    return t == std::make_pair(e * Term<double, Monomial<int>>({-1, {}}), e2);
+}
+
+TEST_CASE( "Spair" ) {
+    REQUIRE( spair() );
 }

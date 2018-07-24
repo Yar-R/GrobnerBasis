@@ -18,7 +18,7 @@ std::pair<RewriteBasis, Basis> RB(const Input& input,
     }
     for (size_t i = 0; i < size(input); ++i) {
         for (size_t j = i + 1; j < size(input); ++i) {
-            insert(H, substract(module_monomial_order, input[i] * ModuleBasis(j), input[j] * ModuleBasis(i)));
+            insert(H, std::make_pair(input[i] * ModuleBasis(j), input[j] * ModuleBasis(i)));
         }
     }
     while (!empty(P)) {
@@ -39,3 +39,4 @@ std::pair<RewriteBasis, Basis> RB(const Input& input,
         }
     }
 };
+

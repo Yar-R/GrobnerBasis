@@ -48,6 +48,11 @@ Term<Coef, Monom> operator+(const Term<Coef, Monom>& a, const Term<Coef, Monom>&
 }
 
 template <typename Coef, typename Monom>
+bool operator==(const Term<Coef, Monom>& a, int b) {
+    return a.coef == b;
+};
+
+template <typename Coef, typename Monom>
 bool operator==(const Term<Coef, Monom>& a, const Term<Coef, Monom>& b) {
     return a.coef == b.coef && (a.coef == 0 || a.monom == b.monom);
 }
@@ -61,5 +66,12 @@ std::experimental::optional<Term<Coef, Monom>> operator/(const Term<Coef, Monom>
     return Term<Coef, Monom>(a.coef / b.coef, get_value(m));
 
 }
+
+template <typename Coef, typename Pow>
+Term<Coef, Pow> gcd(const Term<Coef, Pow>& a, const Term<Coef, Pow>& b) {
+    auto c = gcd(a.coef, b.coef);
+    auto m = gcd(a.monom, b.monom);
+    return Term<Coef, Pow>(c, m);
+};
 
 #endif //GROBNERBASIS_TERM_H

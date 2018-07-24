@@ -8,10 +8,10 @@
 #include "ModuleElement.hpp"
 #include "PairsetOrder.hpp"
 
-using Pairset = std::priority_queue<ModuleElement, std::vector<ModuleElement>, PairsetOrder>;
+using Pairset = std::priority_queue<std::pair<ModuleElement, ModuleElement>, std::vector<std::pair<ModuleElement, ModuleElement>>, PairsetOrder>;
 
 template <typename Less>
-auto insert(Pairset& P, const ModuleElement& e) {
+auto insert(Pairset& P, const std::pair<ModuleElement, ModuleElement>& e) {
     return P.push(e);
 }
 

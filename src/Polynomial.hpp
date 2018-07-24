@@ -18,6 +18,9 @@ template<typename Coef, typename Pow>
 Polynomial<Coef, Pow>& operator+=(Polynomial<Coef, Pow>& a, const Term<Coef, Monomial<Pow>>& b) {
     if (!a.empty() && a.back().monom == b.monom) {
         a.back().coef += b.coef;
+        if (a.back().coef == 0) {
+            a.pop_back();
+        }
     } else {
         a.push_back(b);
     }
