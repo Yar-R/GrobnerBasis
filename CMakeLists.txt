@@ -17,6 +17,7 @@ set(SOURCE_FILES
         src/ModuleMonomialOrder.hpp
         src/Pairset.hpp
         src/ModuleBasis.hpp
+        src/Basis.hpp
         src/MF5.hpp
         src/RB.hpp
         src/F4-5.hpp)

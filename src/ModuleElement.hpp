@@ -70,7 +70,7 @@ Polynomial<Coef, Pow> bar(const MonomialOrder<Pow>& cmp, const Input<Coef, Pow>&
 template <typename Coef, typename Pow>
 std::experimental::optional<ModuleElement<Pow>> sreduce(const MonomialOrder<Pow>& cmp,
                                                    const ModuleMonomialOrder<Pow>& Cmp,
-                                                   const std::vector<Polynomial<Coef, Pow>>& input,
+                                                   const Input<Coef, Pow>& input,
                                                    const ModuleElement<Pow>& a,
                                                    size_t idx,
                                                    const ModuleElement<Pow>& reducer) {
