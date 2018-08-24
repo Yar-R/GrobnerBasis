@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <experimental/optional>
+#include <numeric>
 
 #ifdef OSX
 template<typename T>
@@ -91,6 +92,11 @@ Monomial<Pow> gcd(const Monomial<Pow>& a, const Monomial<Pow>& b) {
         ans.push_back(std::min(a[i], b[i]));
     }
     return ans;
+}
+
+template<typename Pow>
+Pow pow(const Monomial<Pow>& p) {
+    return std::accumulate(p.begin(), p.end(), 0);
 }
 
 #endif //GROBNERBASIS_MONOMIAL_H

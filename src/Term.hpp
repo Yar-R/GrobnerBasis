@@ -14,6 +14,7 @@ public:
     Coef coef;
     Monom monom;
     Term(const Coef& c, const Monom& m) : coef(c), monom(m) {}
+    Term(const Coef& c) : coef(c), monom(0) {}
 };
 
 template <typename Coef, typename Monom>

@@ -93,4 +93,11 @@ Polynomial<Coef, Pow> mul(const MonomialOrder<Pow>& cmp, const Polynomial<Coef, 
     return ans;
 }
 
+template<typename Coef, typename Pow>
+Pow pow(const Polynomial<Coef, Pow>& p) {
+    if (p.empty())
+        return 0;
+    return pow(p[0].monom);
+};
+
 #endif
