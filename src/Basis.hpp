@@ -16,9 +16,4 @@ void insert(Basis<Coef, Pow>& basis, const Polynomial<Coef, Pow>& polynomial) {
     basis.push_back(polynomial);
 };
 
-template<typename Coef, typename Pow>
-void insert(Basis<Coef, Pow>& basis, const Polynomial<Coef, Pow>& polynomial) {
-    basis.push_back(polynomial);
-};
-
 #endif //GROBNERBASIS_BASIS_HPP

@@ -8,24 +8,23 @@
 #include <optional>
 #include "Basis.hpp"
 #include "Input.hpp"
-#include "ModuleMonomialOrder.hpp"
+#include "MF5Signature.hpp"
+#include "Matrix.hpp"
 
 template <typename Coef, typename Pow>
-using Signature = std::pair<size_t, Term<Coef, Pow>>;
-
-template <typename Coef, typename Pow>
-using Matrix = std::vector<std::pair<Signature<Coef, Pow>, Polynomial<Coef, Pow>>>;
+bool nin(std::vector<Monomial<Pow>>& Crit, Monomial<Pow> m) {
+    return std::find(Crit.begin(), Crit.end(), m) == Crit.end();
+};
 
 template <typename Coef, typename Pow>
 Basis MatrixF5(const Input<Coef, Pow>& input,
                const MonomialOrder<Pow>& monomial_order,
                const Pow D) {
-    std::vector<std::pair<Signature, Polynomial<Coef, Pow>>> d_basis, next_basis;
     std::vector<Pow> deg(input.size());
     for (size_t i = 0; i < input.size(); ++i) {
         deg[i] = pow(input[i]);
     }
-
+    std::vector<std::vector<Matrix<Coef, Pow>>> M(D), _M(D);
     for (Pow d = deg[0]; d < D; ++d) {
         M[d][0] = {};
         _M[d][0] = {};
@@ -37,8 +36,20 @@ Basis MatrixF5(const Input<Coef, Pow>& input,
                 M[d][i + 1].push_back(std::make_pair(std::make_pair(i, Term(1)), input[i]));
             } else {
                 M[d][i + 1] = _M[d][i];
-
+                std::vector<Monomial<Pow>> Crit;
+                for (size_t j = M[d - 1][i - 1].size(); j < M[d - 1][i].size(); ++j) {
+                    Signature<Pow> s = M[d - 1][i][j].first;
+                    Polynomial<Coef, Pow> r = M[d - 1][i][j].second;
+                    size_t k = s.first;
+                    Monomial<Pow> m = s.second;
+                    for (Monomial<Pow> variable) {
+                        if (nin(Crit, variable * m)) {
+                            M[d][i].push_back(std::make_pair(std::make_pair(k, variable * m), m * r));
+                        }
+                    }
+                }
             }
+            _M[d][i] = gauss(M[d][i], monomial_order);
         }
     }
 };
