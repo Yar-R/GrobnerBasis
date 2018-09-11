@@ -10,11 +10,11 @@
 #include "MonomialOrder.hpp"
 
 template <typename Coef, typename Pow>
-using Matrix = std::vector<std::pair<Signature<Pow>, Polynomial<Coef, Pow>>>;
+using Matrix = std::vector<std::pair<Signature<Coef, Pow>, Polynomial<Coef, Pow>>>;
 
 template<typename Coef, typename Pow>
 Matrix<Coef, Pow> gauss(
-        Matrix<Coef, Pow>& matrix,
+        Matrix<Coef, Pow> matrix,
         MonomialOrder<Pow>) {
     for (size_t i = 0; i < matrix.size(); ++i) {
 

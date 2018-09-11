@@ -7,7 +7,7 @@
 
 #include "Term.hpp"
 
-template <typename Pow>
-using Signature = std::pair<size_t, Monomial<Pow>>;
+template <typename Coef, typename Pow>
+using Signature = std::pair<size_t, Term<Coef, Pow>>;
 
 #endif //GROBNERBASIS_MF5SIGNATURE_HPP
