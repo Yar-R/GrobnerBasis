@@ -1,0 +1,3 @@
+- скачать catch2: https://raw.githubusercontent.com/catchorg/Catch2/master/single_include/catch2/catch.hpp
+- положить его в tests
+- cmake .
